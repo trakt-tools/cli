@@ -1,0 +1,15 @@
+{
+	"exclude": ["./node_modules"],
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": true,
+		"jsx": "react",
+		"module": "CommonJS",
+		"outDir": "./build",
+		"sourceMap": true,
+		"target": "ES2020",
+		"strict": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true
+	}
+}
