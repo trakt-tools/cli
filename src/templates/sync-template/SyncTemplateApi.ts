@@ -1,16 +1,16 @@
 /**
  * Please remove all generated comments before submitting a PR.
  */
+// @ts-expect-error
+import { ServiceApi } from '@apis/ServiceApi';
 // fragment ^import %str%import
 // @ts-expect-error
-import { Requests } from '../../common/Requests';
+import { Requests } from '@common/Requests';
 // fragment
 // @ts-expect-error
-import { Item } from '../../models/Item';
+import { Item } from '@models/Item';
 // @ts-expect-error
-import { Api } from '../common/Api';
-// @ts-expect-error
-import * as SyncTemplate from './sync-template.json';
+import { SyncTemplateService } from '@/sync-template/SyncTemplateService';
 
 // fragment ^class %str%\nclass
 export interface TemplateHistoryItem {}
@@ -23,11 +23,11 @@ export interface TemplateHistoryItem {}
  *
  * Keep in mind that some services might have hidden APIs that you can use (you can usually find them by watching your network requests when using the service).
  */
-class _SyncTemplateApi extends Api {
+class _SyncTemplateApi extends ServiceApi {
 	// Define any properties you need here
 
 	constructor() {
-		super(SyncTemplate.id);
+		super(SyncTemplateService.id);
 	}
 
 	// fragment ^}\n\nexport\sconst \n%str%}\n\nexport\sconst

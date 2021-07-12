@@ -1,13 +1,13 @@
+const { execSync } = require('child_process');
 const { Command } = require('commander');
 const fs = require('fs');
 const inquirer = require('inquirer');
 const path = require('path');
-const prettier = require('prettier');
-const { updateScrobblerSync, validateArg } = require('../../../common/common');
+const { updateScrobblerSync, validateArg, generateKey } = require('../../../common/common');
 
 const CURRENT_PATH = process.cwd();
 
-const servicesPath = path.resolve(CURRENT_PATH, 'src', 'streaming-services');
+const servicesPath = path.resolve(CURRENT_PATH, 'src', 'services');
 let servicePath = '';
 let service = /** @type {StreamingService} */ ({});
 
@@ -20,7 +20,24 @@ const validateId = (id) => {
 		return 'Service does not exist';
 	}
 
-	service = require(path.resolve(servicePath, `${id}.json`));
+	const serviceKey = generateKey(id);
+	const serviceFile = fs.readFileSync(
+		path.resolve(servicePath, `${serviceKey}Service.ts`),
+		'utf-8'
+	);
+	const serviceMatches = /Service\(([\S\s]+?)\)/m.exec(serviceFile);
+
+	if (!serviceMatches) {
+		return 'Service file not matched';
+	}
+
+	service = JSON.parse(
+		serviceMatches[1]
+			.replace(/\r?\n|\r|\t/g, '')
+			.replace(/([{,])(\w+?):/g, '$1"$2":')
+			.replace(/'/g, '"')
+			.replace(/,([\]}])/g, '$1')
+	);
 	if (service.hasScrobbler && service.hasSync) {
 		return 'Service already has scrobbler and sync, nothing to update';
 	}
@@ -107,18 +124,12 @@ const updateService = async (args) => {
 
 	updateScrobblerSync(servicePath, service, options);
 
-	service.hasScrobbler = service.hasScrobbler || options.addScrobbler;
-	service.hasSync = service.hasSync || options.addSync;
-
-	fs.writeFileSync(
-		path.resolve(servicePath, `${service.id}.json`),
-		prettier.format(JSON.stringify(service), {
-			parser: 'json',
-			printWidth: 100,
-			useTabs: true,
-			singleQuote: true,
-		})
-	);
+	try {
+		execSync(`npx prettier --loglevel silent --write "${servicePath}"`).toString().trim();
+	} catch (err) {
+		console.error('error: Failed to run Prettier');
+		return;
+	}
 
 	console.log('Service updated with success at:', servicePath);
 };
