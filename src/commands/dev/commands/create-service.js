@@ -1,13 +1,13 @@
+const { execSync } = require('child_process');
 const { Command } = require('commander');
 const fs = require('fs');
 const inquirer = require('inquirer');
 const path = require('path');
-const prettier = require('prettier');
 const { addScrobblerSync, validateArg } = require('../../../common/common');
 
 const CURRENT_PATH = process.cwd();
 
-const servicesPath = path.resolve(CURRENT_PATH, 'src', 'streaming-services');
+const servicesPath = path.resolve(CURRENT_PATH, 'src', 'services');
 
 /**
  * @param {string} name
@@ -133,7 +133,7 @@ const promptForMissingOptions = async (options) => {
 const createService = async (args) => {
 	if (!fs.existsSync(servicesPath)) {
 		console.error(
-			'error: This command must be called from the Universal Trakt Scrobbler folder (could not find "src/streaming-services")'
+			'error: This command must be called from the Universal Trakt Scrobbler folder (could not find "src/services")'
 		);
 		return;
 	}
@@ -163,18 +163,14 @@ const createService = async (args) => {
 
 	const servicePath = path.resolve(servicesPath, service.id);
 	fs.mkdirSync(servicePath);
-
-	fs.writeFileSync(
-		path.resolve(servicePath, `${service.id}.json`),
-		prettier.format(JSON.stringify(service), {
-			parser: 'json',
-			printWidth: 100,
-			useTabs: true,
-			singleQuote: true,
-		})
-	);
-
 	addScrobblerSync(servicePath, service);
+
+	try {
+		execSync(`npx prettier --loglevel silent --write "${servicePath}"`).toString().trim();
+	} catch (err) {
+		console.error('error: Failed to run Prettier');
+		return;
+	}
 
 	console.log('Service created with success at:', servicePath);
 };

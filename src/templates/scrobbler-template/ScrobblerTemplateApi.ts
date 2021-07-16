@@ -2,11 +2,11 @@
  * Please remove all generated comments before submitting a PR.
  */
 // @ts-expect-error
-import { Item } from '../../models/Item';
+import { ServiceApi } from '@apis/ServiceApi';
 // @ts-expect-error
-import { Api } from '../common/Api';
+import { Item } from '@models/Item';
 // @ts-expect-error
-import * as ScrobblerTemplate from './scrobbler-template.json';
+import { ScrobblerTemplateService } from '@/scrobbler-template/ScrobblerTemplateService';
 
 // Define any types you need here
 
@@ -15,11 +15,11 @@ import * as ScrobblerTemplate from './scrobbler-template.json';
  *
  * Keep in mind that some services might have hidden APIs that you can use (you can usually find them by watching your network requests when using the service).
  */
-class _ScrobblerTemplateApi extends Api {
+class _ScrobblerTemplateApi extends ServiceApi {
 	// Define any properties you need here
 
 	constructor() {
-		super(ScrobblerTemplate.id);
+		super(ScrobblerTemplateService.id);
 	}
 
 	// Define any methods you need here

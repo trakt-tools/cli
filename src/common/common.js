@@ -11,6 +11,10 @@ const templatesPath = path.resolve(BASE_PATH, '..', 'templates');
  * @param {StreamingService} service
  */
 const addScrobblerSync = (servicePath, service) => {
+	const serviceKey = generateKey(service.id);
+
+	generateService(servicePath, service, serviceKey);
+
 	let apiTemplate = '';
 	let scrobblerApiTemplate = '';
 	let syncApiTemplate = '';
@@ -32,18 +36,13 @@ const addScrobblerSync = (servicePath, service) => {
 		apiTemplate = scrobblerApiTemplate || syncApiTemplate;
 	}
 	if (apiTemplate) {
-		const serviceKey = generateKey(service.id);
-
 		apiTemplate = replaceTemplate(apiTemplate, service.id, serviceKey);
 		fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Api.ts`), apiTemplate);
 
 		if (service.hasScrobbler) {
-			let eventsTemplate = fs.readFileSync(
-				path.resolve(templatesPath, 'scrobbler-template', 'ScrobblerTemplateEvents.ts'),
-				'utf-8'
-			);
-			eventsTemplate = replaceTemplate(eventsTemplate, service.id, serviceKey);
-			fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Events.ts`), eventsTemplate);
+			let contentTemplate = fs.readFileSync(path.resolve(templatesPath, 'template.ts'), 'utf-8');
+			contentTemplate = replaceTemplate(contentTemplate, service.id, serviceKey);
+			fs.writeFileSync(path.resolve(servicePath, `${service.id}.ts`), contentTemplate);
 
 			let parserTemplate = fs.readFileSync(
 				path.resolve(templatesPath, 'scrobbler-template', 'ScrobblerTemplateParser.ts'),
@@ -53,6 +52,18 @@ const addScrobblerSync = (servicePath, service) => {
 			fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Parser.ts`), parserTemplate);
 		}
 	}
+};
+
+/**
+ * @param {string} servicePath
+ * @param {StreamingService} service
+ * @param {string} serviceKey
+ */
+const generateService = (servicePath, service, serviceKey) => {
+	let serviceTemplate = fs.readFileSync(path.resolve(templatesPath, 'TemplateService.ts'), 'utf-8');
+	serviceTemplate = replaceTemplate(serviceTemplate, service.id, serviceKey);
+	serviceTemplate = serviceTemplate.replace(/\/\*\s%service%\s\*\//, JSON.stringify(service));
+	fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Service.ts`), serviceTemplate);
 };
 
 /**
@@ -96,8 +107,8 @@ const generateKey = (id) => {
  */
 const replaceTemplate = (template, serviceId, serviceKey) => {
 	return template
-		.replace(/^\t*\/\/\s@ts-expect-error\n/gm, '')
-		.replace(/^\t*\/\/\sfragment.*\n/gm, '')
+		.replace(/^[\s\t]*\/\/\s@ts-expect-error\n/gm, '')
+		.replace(/^[\s\t]*\/\/\sfragment.*\n/gm, '')
 		.replace(/(scrobbler-)?(sync-)?template/g, serviceId)
 		.replace(/(Scrobbler)?(Sync)?Template/g, serviceKey);
 };
@@ -115,6 +126,8 @@ const updateScrobblerSync = (servicePath, service, updateOptions) => {
 		return;
 	}
 
+	const serviceKey = generateKey(service.id);
+
 	let apiTemplate = '';
 	if (service.hasScrobbler) {
 		apiTemplate = fs.readFileSync(
@@ -128,20 +141,15 @@ const updateScrobblerSync = (servicePath, service, updateOptions) => {
 		);
 	}
 	if (apiTemplate) {
-		const serviceKey = generateKey(service.id);
-
 		const api = fs.readFileSync(path.resolve(servicePath, `${serviceKey}Api.ts`), 'utf-8');
 		apiTemplate = applyFragments(apiTemplate, api);
 		apiTemplate = replaceTemplate(apiTemplate, service.id, serviceKey);
 		fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Api.ts`), apiTemplate);
 
 		if (updateOptions.addScrobbler) {
-			let eventsTemplate = fs.readFileSync(
-				path.resolve(templatesPath, 'scrobbler-template', 'ScrobblerTemplateEvents.ts'),
-				'utf-8'
-			);
-			eventsTemplate = replaceTemplate(eventsTemplate, service.id, serviceKey);
-			fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Events.ts`), eventsTemplate);
+			let contentTemplate = fs.readFileSync(path.resolve(templatesPath, 'template.ts'), 'utf-8');
+			contentTemplate = replaceTemplate(contentTemplate, service.id, serviceKey);
+			fs.writeFileSync(path.resolve(servicePath, `${service.id}.ts`), contentTemplate);
 
 			let parserTemplate = fs.readFileSync(
 				path.resolve(templatesPath, 'scrobbler-template', 'ScrobblerTemplateParser.ts'),
@@ -151,6 +159,11 @@ const updateScrobblerSync = (servicePath, service, updateOptions) => {
 			fs.writeFileSync(path.resolve(servicePath, `${serviceKey}Parser.ts`), parserTemplate);
 		}
 	}
+
+	service.hasScrobbler = service.hasScrobbler || updateOptions.addScrobbler;
+	service.hasSync = service.hasSync || updateOptions.addSync;
+
+	generateService(servicePath, service, serviceKey);
 };
 
 /**

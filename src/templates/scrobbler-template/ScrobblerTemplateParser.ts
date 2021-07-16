@@ -2,8 +2,9 @@
  * Please remove all generated comments before submitting a PR.
  */
 // @ts-expect-error
-import { ScrobbleParser } from '../common/ScrobbleParser';
-import { ScrobblerTemplateApi } from './ScrobblerTemplateApi';
+import { ScrobbleParser } from '@common/ScrobbleParser';
+// @ts-expect-error
+import { ScrobblerTemplateApi } from '@/scrobbler-template/ScrobblerTemplateApi';
 
 // Define any types you need here
 
