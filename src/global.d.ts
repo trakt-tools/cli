@@ -6,6 +6,7 @@ declare interface StreamingService {
 	hasScrobbler: boolean;
 	hasSync: boolean;
 	hasAutoSync: boolean;
+	limitations?: string[];
 }
 
 declare type CreateStreamingServiceOptions = Omit<StreamingService, 'hostPatterns'>;
