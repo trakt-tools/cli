@@ -40,3 +40,11 @@ npx @trakt-tools/cli
     ```
     npx trakt-tools dev update-service --id "netflix" --add-scrobbler
     ```
+
+  - `update-readme`: Updates the README
+
+    Example:
+
+    ```
+    npx trakt-tools dev update-readme
+    ```
