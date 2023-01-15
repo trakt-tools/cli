@@ -17,7 +17,7 @@ class _ScrobblerTemplateParser extends ScrobbleParser {
 	constructor() {
 		super(ScrobblerTemplateApi, {
 			videoPlayerSelector: 'video', // This is the default option, so it doesn't need to be specified
-			watchingUrlRegex: /\/watch\/(.+)/, // https://streamingservice.com/watch/ABC123 => ABC123
+			watchingUrlRegex: /\/watch\/(?<id>.+)/, // https://streamingservice.com/watch/ABC123 => ABC123
 		});
 	}
 
