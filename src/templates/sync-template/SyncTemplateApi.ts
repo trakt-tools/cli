@@ -36,24 +36,42 @@ class _SyncTemplateApi extends ServiceApi {
 	 *
 	 * It should also set `hasReachedHistoryEnd` to true when there are no more history items to load.
 	 */
-	async loadNextHistoryPage(): Promise<TemplateHistoryItem[]> {
+	async loadHistoryItems(): Promise<TemplateHistoryItem[]> {
 		// Example implementation:
 
 		let historyItems: TemplateHistoryItem[] = [];
 
 		// Retrieve the history items
 		const responseText = await Requests.send({
-			url: '...',
+			// note, that this.nextHistoryPage starts at 0
+			url: `...?page=${this.nextHistoryPage}`,
 			method: 'GET',
 		});
 		const responseJson = JSON.parse(responseText);
 		historyItems = responseJson?.items ?? [];
+
+		this.nextHistoryPage += 1;
 
 		// Check if it has reached the history end
 		// @ts-expect-error
 		this.hasReachedHistoryEnd = historyItems.length === 0;
 
 		return historyItems;
+	}
+
+	/** 
+	 * This method should return a unique ID for a history item 
+	 */
+	getHistoryItemId(historyItem: TemplateHistoryItem): string {
+		throw new Error('not implemented');
+	}
+
+	/** 
+	 * This method is should update the `watchedAt` and `progress` data of `item` based in the `historyItem` 
+	 */
+	updateItemFromHistory(item: ScrobbleItemValues, historyItem: TemplateHistoryItem): Promisable<void> {
+		// update item.watchedAt and item.progress here
+		throw new Error('not implemented');
 	}
 
 	/**
